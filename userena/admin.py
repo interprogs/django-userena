@@ -19,3 +19,6 @@ class UserenaAdmin(UserAdmin, GuardedModelAdmin):
 admin.site.unregister(User)
 admin.site.register(User, UserenaAdmin)
 admin.site.register(get_profile_model())
+#test
+#test
+#test

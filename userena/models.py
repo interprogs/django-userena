@@ -197,6 +197,51 @@ class UserenaSignup(models.Model):
                   settings.DEFAULT_FROM_EMAIL,
                   [self.user.email,])
 
+    def send_approval_email(self):
+        """
+        Sends an approval email to the user.
+
+        This email is sent when USERENA_MODERATE_SIGNUP, after an admin
+        has approved the signup.
+
+        """
+        context= {'user': self.user,
+                  'protocol': get_protocol(),
+                  'site': Site.objects.get_current()}
+
+        subject = render_to_string('userena/emails/approval_email_subject.txt',
+            context)
+        subject = ''.join(subject.splitlines())
+
+        message = render_to_string('userena/emails/approval_email_message.txt',
+            context)
+        send_mail(subject,
+            message,
+            settings.DEFAULT_FROM_EMAIL,
+            [self.user.email,])
+
+    def send_rejection_email(self):
+        """
+        Sends a rejection email to the user.
+
+        This email is sent when USERENA_MODERATE_SIGNUP, after an admin
+        has rejected the signup.
+
+        """
+        context= {'user': self.user,
+                  'site': Site.objects.get_current()}
+
+        subject = render_to_string('userena/emails/rejection_email_subject.txt',
+            context)
+        subject = ''.join(subject.splitlines())
+
+        message = render_to_string('userena/emails/rejection_email_message.txt',
+            context)
+        send_mail(subject,
+            message,
+            settings.DEFAULT_FROM_EMAIL,
+            [self.user.email,])
+
 class UserenaBaseProfile(models.Model):
     """ Base model needed for extra profile functionality """
     PRIVACY_CHOICES = (

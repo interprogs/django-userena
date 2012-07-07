@@ -178,7 +178,8 @@ def activate(request, activation_key,
 
     user = UserenaSignup.objects.activate_user(activation_key)
     if user and userena_settings.USERENA_MODERATE_SIGNUP:
-        return direct_to_template(request, template_name_moderation, extra_context=extra_context)
+         return ExtraContextTemplateView.as_view(template_name=template_name_moderation,
+            extra_context=extra_context)(request)
     elif user:
         # Sign the user in.
         auth_user = authenticate(identification=user.email,

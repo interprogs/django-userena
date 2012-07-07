@@ -17,6 +17,7 @@ from userena.forms import (SignupForm, SignupFormOnlyEmail, AuthenticationForm,
                            ChangeEmailForm, EditProfileForm)
 from userena.models import UserenaSignup
 from userena.decorators import secure_required
+from django.views.generic.simple import direct_to_template
 from userena.backends import UserenaAuthenticationBackend
 from userena.utils import signin_redirect, get_profile_model
 from userena import signals as userena_signals
@@ -141,6 +142,7 @@ def signup(request, signup_form=SignupForm,
 @secure_required
 def activate(request, activation_key,
              template_name='userena/activate_fail.html',
+             template_name_moderation='userena/moderation.html',
              success_url=None, extra_context=None):
     """
     Activate a user with an activation key.
@@ -172,8 +174,12 @@ def activate(request, activation_key,
         context. Default to an empty dictionary.
 
     """
+    if not extra_context: extra_context = dict()
+
     user = UserenaSignup.objects.activate_user(activation_key)
-    if user:
+    if user and userena_settings.USERENA_MODERATE_SIGNUP:
+        return direct_to_template(request, template_name_moderation, extra_context=extra_context)
+    elif user:
         # Sign the user in.
         auth_user = authenticate(identification=user.email,
                                  check_password=False)
@@ -188,7 +194,7 @@ def activate(request, activation_key,
                                     kwargs={'username': user.username})
         return redirect(redirect_to)
     else:
-        if not extra_context: extra_context = dict()
+    #    if not extra_context: extra_context = dict()
         return ExtraContextTemplateView.as_view(template_name=template_name,
                                             extra_context=extra_context)(request)
 
